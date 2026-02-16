@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  /* Font sync with layout.tsx variables */
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+
+  /* Luxury Palette */
+  --color-nexus-blue: #38bdf8;
+  --color-slate-950: #020617;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 2%;
+    --foreground: 0 0% 98%;
+  }
+
+  body {
+    @apply bg-black text-neutral-200 antialiased;
+    /* Prevents the 'gray flash' on mobile click */
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  /* Luxury Blue Glow Effect */
+  .nexus-glow {
+    box-shadow: 0 0 20px 2px rgba(56, 189, 248, 0.15);
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Custom Slim Luxury Scrollbar */
+  .vault-scrollbar::-webkit-scrollbar {
+    width: 3px;
+  }
+  .vault-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  .vault-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full hover:bg-nexus-blue/40 transition-colors;
+  }
+}
+
+/* Native App Feel: Prevent selection on UI elements */
+nav, button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Luxury Input Styling */
+input, textarea {
+  @apply focus:ring-1 focus:ring-nexus-blue/30 transition-all duration-300;
+}
