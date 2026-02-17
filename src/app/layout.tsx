@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Outfit, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-// 1. IMPORT THE BRANDING COMPONENT (You were missing this!)
+// 1. IMPORT BRANDING (Tab Title) 
+// Note: We REMOVED "Navbar" so the fixed header is gone.
 import DynamicBranding from "@/components/DynamicBranding";
-import Navbar from "@/components/Navbar";
 
 const sans = Outfit({ 
   subsets: ["latin"], 
@@ -19,7 +19,6 @@ const serif = Playfair_Display({
 });
 
 // Deployment Constants
-// We use a fallback here because the "Real" name comes from the Client Component below
 const APP_NAME = "Loading Portal..."; 
 const THEME_COLOR = process.env.NEXT_PUBLIC_THEME_COLOR || "#38bdf8";
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -61,11 +60,10 @@ export default function RootLayout({
           bg-[#050505]
         `}
       >
-        {/* 2. INSERT THE COMPONENT HERE (You were missing this!) */}
-        {/* This is the magic script that renames the tab to "Island Dog" */}
+        {/* This updates the Browser Tab Title (e.g. "Island Dog | Portal") */}
         <DynamicBranding />
 
-        <Navbar />
+        {/* Navbar removed as requested to keep original design */}
 
         <div className="fixed inset-0 bg-gradient-to-b from-black via-slate-950 to-black pointer-events-none -z-50" />
         
