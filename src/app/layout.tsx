@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Playfair_Display } from "next/font/google";
 import "./globals.css";
-// Import the branding helper we just created
-import DynamicBranding from "@/components/DynamicBranding";
 
-// --- FONT CONFIGURATION ---
+// 1. IMPORT THE BRANDING COMPONENT (You were missing this!)
+import DynamicBranding from "@/components/DynamicBranding";
+import Header from "@/components/Header";
+
 const sans = Outfit({ 
   subsets: ["latin"], 
   variable: '--font-sans',
@@ -17,22 +18,15 @@ const serif = Playfair_Display({
   display: 'swap',
 });
 
-// --- DEPLOYMENT CONSTANTS (UPDATED FOR AUTOMATION) ---
-// CRITICAL FIX: We now look for the environment variable injected by GitHub Actions first.
-// If that is missing (local dev), we fall back to an empty string.
+// Deployment Constants
+// We use a fallback here because the "Real" name comes from the Client Component below
+const APP_NAME = "Loading Portal..."; 
+const THEME_COLOR = process.env.NEXT_PUBLIC_THEME_COLOR || "#38bdf8";
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
-const APP_NAME = "Premium Client Portal"; 
-const THEME_COLOR = process.env.NEXT_PUBLIC_THEME_COLOR || "#38bdf8";
-
-// --- METADATA & PWA BRAIN ---
 export const metadata: Metadata = {
-  title: {
-    default: APP_NAME,
-    template: `%s | ${APP_NAME}`,
-  },
-  description: "Premium Client Portal - Official App",
-  // These now use the dynamic BASE_PATH so icons work on every new repo
+  title: APP_NAME,
+  description: "Premium Client Portal",
   manifest: `${BASE_PATH}/manifest.json`, 
   icons: {
     icon: `${BASE_PATH}/favicon.ico`,
@@ -40,13 +34,12 @@ export const metadata: Metadata = {
   },
 };
 
-// --- VIEWPORT CONFIGURATION ---
 export const viewport: Viewport = {
   themeColor: THEME_COLOR,
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false, // Prevents zooming to maintain "Native App" feel
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -68,13 +61,12 @@ export default function RootLayout({
           bg-[#050505]
         `}
       >
-        {/* This component runs silently on load. 
-           It looks at the URL (e.g. /west-ashley-paws) and updates the 
-           browser tab title automatically. 
-        */}
+        {/* 2. INSERT THE COMPONENT HERE (You were missing this!) */}
+        {/* This is the magic script that renames the tab to "Island Dog" */}
         <DynamicBranding />
 
-        {/* Persistent background gradient for the luxury aesthetic */}
+        <Header />
+
         <div className="fixed inset-0 bg-gradient-to-b from-black via-slate-950 to-black pointer-events-none -z-50" />
         
         {children}
