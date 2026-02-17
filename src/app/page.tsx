@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   History, ShoppingBag, Edit3, Trash2, X, ChevronRight, 
   CheckCircle, Bell, User, Plus, Heart, Dog, Download, 
-  Smartphone, MapPin, Sparkles, Award, ShieldCheck
+  Smartphone, MapPin, Sparkles, Award, ShieldCheck, Pencil
 } from 'lucide-react';
 
 export default function NexusMasterPortal() {
@@ -16,7 +16,8 @@ export default function NexusMasterPortal() {
   
   // UI States
   const [isScheduling, setIsScheduling] = useState<any>(null); 
-  const [isAddingPet, setIsAddingPet] = useState(false);
+  const [isPetModalOpen, setIsPetModalOpen] = useState(false); // Renamed for clarity
+  const [editingPetId, setEditingPetId] = useState<number | null>(null); // Tracks if we are editing
   const [showInstallHelp, setShowInstallHelp] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   
@@ -32,7 +33,7 @@ export default function NexusMasterPortal() {
 
   // Glassmorphism Utility (Clean & Sharp)
   const glassBase = {
-    backgroundColor: `${brandColor}10`, // Reduced opacity for cleaner look
+    backgroundColor: `${brandColor}10`, 
     backdropFilter: 'blur(20px)',
     border: `1px solid ${brandColor}15`,
   };
@@ -64,7 +65,7 @@ export default function NexusMasterPortal() {
     return days;
   }, []);
 
-  // --- LOGIC: ACTIONS ---
+  // --- LOGIC: BOOKINGS ---
   const saveBooking = () => {
     if (!selectedDate || !selectedTime) return;
     const newBooking = { id: Date.now(), service: isScheduling.name, price: isScheduling.price, date: selectedDate, time: selectedTime };
@@ -81,15 +82,51 @@ export default function NexusMasterPortal() {
     localStorage.setItem('nexus_vault_data', JSON.stringify(updated));
   };
 
+  // --- LOGIC: PETS (ADD & EDIT) ---
+  const openPetModal = (pet?: any) => {
+    if (pet) {
+      // Edit Mode
+      setNewPet(pet);
+      setEditingPetId(pet.id);
+    } else {
+      // Add Mode
+      setNewPet({ name: '', breed: '', notes: '' });
+      setEditingPetId(null);
+    }
+    setIsPetModalOpen(true);
+  };
+
   const savePet = () => {
     if (!newPet.name) return;
-    const petEntry = { id: Date.now(), ...newPet };
-    const updated = [petEntry, ...pets];
+    
+    let updatedPets;
+    
+    if (editingPetId) {
+      // Update Existing Pet
+      updatedPets = pets.map(p => p.id === editingPetId ? { ...newPet, id: editingPetId } : p);
+      showToast("Profile Updated");
+    } else {
+      // Create New Pet
+      const petEntry = { id: Date.now(), ...newPet };
+      updatedPets = [petEntry, ...pets];
+      showToast(`${newPet.name} Added`);
+    }
+
+    setPets(updatedPets);
+    localStorage.setItem('nexus_pet_data', JSON.stringify(updatedPets));
+    
+    // Reset
+    setNewPet({ name: '', breed: '', notes: '' });
+    setEditingPetId(null);
+    setIsPetModalOpen(false);
+  };
+
+  const deletePet = (id: number) => {
+    // Optional: Add delete logic if needed, usually good UX to have with edit
+    const updated = pets.filter(p => p.id !== id);
     setPets(updated);
     localStorage.setItem('nexus_pet_data', JSON.stringify(updated));
-    setNewPet({ name: '', breed: '', notes: '' });
-    setIsAddingPet(false);
-    showToast(`${newPet.name} Added`);
+    showToast("Profile Removed");
   };
 
   const showToast = (msg: string) => {
@@ -102,10 +139,12 @@ export default function NexusMasterPortal() {
   return (
     <div className="max-w-md mx-auto min-h-screen pb-32 relative bg-[#09090b] text-white selection:bg-white/20 font-sans">
       
-      {/* STANDARD FONT IMPORT (Inter Only - No Curves) */}
+      {/* PREMIUM FONT IMPORT: OUTFIT */}
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body, h1, h2, h3, button { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap');
+        body, button, input, textarea { font-family: 'Outfit', sans-serif; }
+        h1, h2, h3 { letter-spacing: -0.02em; }
+        .tracking-widest { letter-spacing: 0.2em !important; }
       `}</style>
 
       {/* BACKGROUND GLOW */}
@@ -117,7 +156,6 @@ export default function NexusMasterPortal() {
       {/* HEADER */}
       <header className="px-6 pt-14 pb-8 relative z-10 flex justify-between items-start">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          {/* REMOVED ITALIC AND SERIF */}
           <h1 className="text-3xl font-extrabold tracking-tight uppercase leading-none">
             {brandName}
           </h1>
@@ -159,7 +197,6 @@ export default function NexusMasterPortal() {
                       </div>
                       <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Verified Partner</span>
                    </div>
-                   {/* REMOVED ITALIC */}
                    <h2 className="text-3xl font-bold mb-2 leading-tight">Refined Care for <br/>Your Family.</h2>
                    <p className="text-sm text-neutral-400 leading-relaxed mb-6">Experience boutique grooming services tailored for {brandCity}'s elite pets.</p>
                    
@@ -205,12 +242,26 @@ export default function NexusMasterPortal() {
           {activeTab === 'family' && (
             <motion.div key="family" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
               {pets.map(p => (
-                <div key={p.id} style={glassBase} className="p-5 rounded-[2rem] flex items-center gap-5 border border-white/5">
-                  <div className="h-12 w-12 bg-white/5 border border-white/5 rounded-xl flex items-center justify-center text-xl font-bold" style={{ color: brandColor }}>{p.name[0]}</div>
-                  <div><h4 className="text-white font-bold">{p.name}</h4><p className="text-neutral-500 text-[10px] font-bold uppercase tracking-widest">{p.breed}</p></div>
+                <div key={p.id} style={glassBase} className="p-5 rounded-[2rem] flex items-center justify-between border border-white/5 group">
+                  <div className="flex items-center gap-5">
+                    <div className="h-12 w-12 bg-white/5 border border-white/5 rounded-xl flex items-center justify-center text-xl font-bold" style={{ color: brandColor }}>{p.name[0]}</div>
+                    <div>
+                        <h4 className="text-white font-bold">{p.name}</h4>
+                        <p className="text-neutral-500 text-[10px] font-bold uppercase tracking-widest">{p.breed}</p>
+                    </div>
+                  </div>
+                  {/* EDIT BUTTON */}
+                  <div className="flex gap-2">
+                     <button onClick={() => openPetModal(p)} className="h-10 w-10 bg-white/5 rounded-xl flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all">
+                        <Edit3 size={16}/>
+                     </button>
+                     <button onClick={() => deletePet(p.id)} className="h-10 w-10 bg-red-500/5 rounded-xl flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all">
+                        <Trash2 size={16}/>
+                     </button>
+                  </div>
                 </div>
               ))}
-              <button onClick={() => setIsAddingPet(true)} className="w-full py-5 border border-dashed border-white/10 rounded-[2rem] text-neutral-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white/5 active:scale-95 transition-all">+ Add Profile</button>
+              <button onClick={() => openPetModal()} className="w-full py-5 border border-dashed border-white/10 rounded-[2rem] text-neutral-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white/5 active:scale-95 transition-all">+ Add Profile</button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -258,20 +309,22 @@ export default function NexusMasterPortal() {
         )}
       </AnimatePresence>
 
-      {/* ADD PET MODAL */}
+      {/* PET MODAL (ADD & EDIT) */}
       <AnimatePresence>
-        {isAddingPet && (
+        {isPetModalOpen && (
           <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} className="fixed inset-0 z-[100] bg-[#09090b] p-8 flex flex-col">
             <div className="flex justify-between items-center mb-10">
-              <h2 className="text-2xl font-bold">New Profile</h2>
-              <button onClick={() => setIsAddingPet(false)} className="h-10 w-10 bg-white/5 rounded-full flex items-center justify-center"><X size={20}/></button>
+              <h2 className="text-2xl font-bold">{editingPetId ? 'Edit Profile' : 'New Profile'}</h2>
+              <button onClick={() => setIsPetModalOpen(false)} className="h-10 w-10 bg-white/5 rounded-full flex items-center justify-center"><X size={20}/></button>
             </div>
             <div className="space-y-4 flex-1">
               <input type="text" placeholder="Pet Name" value={newPet.name} onChange={e => setNewPet({...newPet, name: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl p-5 text-sm text-white focus:outline-none focus:border-white/30 transition-all" />
               <input type="text" placeholder="Breed / Type" value={newPet.breed} onChange={e => setNewPet({...newPet, breed: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl p-5 text-sm text-white focus:outline-none focus:border-white/30 transition-all" />
               <textarea placeholder="Medical Notes / Preferences" value={newPet.notes} onChange={e => setNewPet({...newPet, notes: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl p-5 text-sm text-white focus:outline-none focus:border-white/30 transition-all h-32 resize-none" />
             </div>
-            <button onClick={savePet} style={{ backgroundColor: brandColor }} className="w-full py-5 rounded-2xl text-black font-bold text-xs uppercase tracking-[0.2em] active:scale-95 transition-all">Save Profile</button>
+            <button onClick={savePet} style={{ backgroundColor: brandColor }} className="w-full py-5 rounded-2xl text-black font-bold text-xs uppercase tracking-[0.2em] active:scale-95 transition-all">
+                {editingPetId ? 'Update Profile' : 'Save Profile'}
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
