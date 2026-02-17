@@ -8,6 +8,9 @@ import {
   Smartphone, MapPin, Sparkles, Award, ShieldCheck, Pencil
 } from 'lucide-react';
 
+// 1. IMPORT THE SMART TITLE COMPONENT
+import HeroTitle from "@/components/HeroTitle"; 
+
 export default function NexusMasterPortal() {
   const [activeTab, setActiveTab] = useState('experience');
   const [bookings, setBookings] = useState<any[]>([]);
@@ -16,8 +19,8 @@ export default function NexusMasterPortal() {
   
   // UI States
   const [isScheduling, setIsScheduling] = useState<any>(null); 
-  const [isPetModalOpen, setIsPetModalOpen] = useState(false); // Renamed for clarity
-  const [editingPetId, setEditingPetId] = useState<number | null>(null); // Tracks if we are editing
+  const [isPetModalOpen, setIsPetModalOpen] = useState(false);
+  const [editingPetId, setEditingPetId] = useState<number | null>(null);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   
@@ -27,7 +30,7 @@ export default function NexusMasterPortal() {
   const [selectedTime, setSelectedTime] = useState('');
 
   // --- BRANDING DNA ---
-  const brandName = process.env.NEXT_PUBLIC_BUSINESS_NAME || "Nexus Master Lab";
+  // We keep these for colors/cities, but the Name will be handled by HeroTitle
   const brandCity = process.env.NEXT_PUBLIC_BUSINESS_CITY || "Premium Experience";
   const brandColor = process.env.NEXT_PUBLIC_THEME_COLOR || "#38bdf8";
 
@@ -85,11 +88,9 @@ export default function NexusMasterPortal() {
   // --- LOGIC: PETS (ADD & EDIT) ---
   const openPetModal = (pet?: any) => {
     if (pet) {
-      // Edit Mode
       setNewPet(pet);
       setEditingPetId(pet.id);
     } else {
-      // Add Mode
       setNewPet({ name: '', breed: '', notes: '' });
       setEditingPetId(null);
     }
@@ -98,31 +99,23 @@ export default function NexusMasterPortal() {
 
   const savePet = () => {
     if (!newPet.name) return;
-    
     let updatedPets;
-    
     if (editingPetId) {
-      // Update Existing Pet
       updatedPets = pets.map(p => p.id === editingPetId ? { ...newPet, id: editingPetId } : p);
       showToast("Profile Updated");
     } else {
-      // Create New Pet
       const petEntry = { id: Date.now(), ...newPet };
       updatedPets = [petEntry, ...pets];
       showToast(`${newPet.name} Added`);
     }
-
     setPets(updatedPets);
     localStorage.setItem('nexus_pet_data', JSON.stringify(updatedPets));
-    
-    // Reset
     setNewPet({ name: '', breed: '', notes: '' });
     setEditingPetId(null);
     setIsPetModalOpen(false);
   };
 
   const deletePet = (id: number) => {
-    // Optional: Add delete logic if needed, usually good UX to have with edit
     const updated = pets.filter(p => p.id !== id);
     setPets(updated);
     localStorage.setItem('nexus_pet_data', JSON.stringify(updated));
@@ -157,7 +150,8 @@ export default function NexusMasterPortal() {
       <header className="px-6 pt-14 pb-8 relative z-10 flex justify-between items-start">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <h1 className="text-3xl font-extrabold tracking-tight uppercase leading-none">
-            {brandName}
+            {/* 2. REPLACED STATIC TEXT WITH SMART COMPONENT */}
+            <HeroTitle />
           </h1>
           <div className="flex items-center gap-2 mt-3 opacity-80">
              <MapPin size={14} style={{ color: brandColor }} />
@@ -205,7 +199,7 @@ export default function NexusMasterPortal() {
                     style={{ backgroundColor: brandColor }}
                     className="w-full py-4 rounded-xl text-black font-bold text-xs uppercase tracking-[0.1em] shadow-lg active:scale-95 transition-all"
                    >
-                      Reserve Now
+                     Reserve Now
                    </button>
                  </div>
               </div>
@@ -222,8 +216,8 @@ export default function NexusMasterPortal() {
               <motion.div key="vault" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
                 {bookings.length === 0 ? (
                   <div style={glassBase} className="py-20 text-center rounded-[2rem] flex flex-col items-center border border-white/5">
-                     <History size={32} className="opacity-20 mb-4" />
-                     <p className="opacity-40 text-xs font-bold uppercase tracking-widest">No Past History</p>
+                      <History size={32} className="opacity-20 mb-4" />
+                      <p className="opacity-40 text-xs font-bold uppercase tracking-widest">No Past History</p>
                   </div>
                 ) : (
                   bookings.map(b => (
@@ -252,12 +246,12 @@ export default function NexusMasterPortal() {
                   </div>
                   {/* EDIT BUTTON */}
                   <div className="flex gap-2">
-                     <button onClick={() => openPetModal(p)} className="h-10 w-10 bg-white/5 rounded-xl flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all">
+                      <button onClick={() => openPetModal(p)} className="h-10 w-10 bg-white/5 rounded-xl flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all">
                         <Edit3 size={16}/>
-                     </button>
-                     <button onClick={() => deletePet(p.id)} className="h-10 w-10 bg-red-500/5 rounded-xl flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all">
+                      </button>
+                      <button onClick={() => deletePet(p.id)} className="h-10 w-10 bg-red-500/5 rounded-xl flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all">
                         <Trash2 size={16}/>
-                     </button>
+                      </button>
                   </div>
                 </div>
               ))}
