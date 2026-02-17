@@ -193,7 +193,7 @@ export default function NexusMasterPortal() {
                       <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Verified Partner</span>
                    </div>
                    <h2 className="text-3xl font-bold mb-2 leading-tight">Refined Care for <br/>Your Family.</h2>
-                   <p className="text-sm text-neutral-400 leading-relaxed mb-6">Experience boutique grooming services tailored for {data.city}'s elite pets.</p>
+                  <p className="text-sm text-neutral-400 leading-relaxed mb-6"> Experience boutique grooming services tailored for <SmartCity />'s elite pets. </p>
                    
                    <button 
                     onClick={() => setIsScheduling({name: "Premium Session", price: "$120"})}
